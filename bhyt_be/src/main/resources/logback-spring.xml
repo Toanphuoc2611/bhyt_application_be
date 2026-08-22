@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!-- Directory for logs -->
+  <property name="LOG_DIR" value="logs" />
+
+  <!-- System log appender -->
+  <appender name="SYSTEM" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!-- active file (current day) -->
+    <file>${LOG_DIR}/bhyt_log_system_%d{ddMMyyyy}.log</file>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- archived files: date + index -->
+      <fileNamePattern>${LOG_DIR}/bhyt_log_system_%d{ddMMyyyy}.%i.log.zip</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- roll when reaches 10MB -->
+        <maxFileSize>10MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <!-- keep approx 5 files per day by total size cap (5 * 10MB) -->
+      <totalSizeCap>50MB</totalSizeCap>
+      <!-- keep archives as long as totalSizeCap allows -->
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Operation/action log appender -->
+  <appender name="OPERATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/bhyt_log_operation_%d{ddMMyyyy}.log</file>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/bhyt_log_operation_%d{ddMMyyyy}.%i.log.zip</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>10MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <totalSizeCap>50MB</totalSizeCap>
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- root logger writes to SYSTEM -->
+  <root level="INFO">
+    <appender-ref ref="SYSTEM" />
+  </root>
+
+  <!-- dedicated logger for operation/action logs -->
+  <logger name="operation" level="INFO" additivity="false">
+    <appender-ref ref="OPERATION" />
+  </logger>
+
+</configuration>
