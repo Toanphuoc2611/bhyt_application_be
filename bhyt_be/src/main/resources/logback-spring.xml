@@ -1,56 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cấu hình log cho phần mềm quản lý BHYT.
+  - Appender SYSTEM: log hệ thống chung (root logger).
+  - Appender OPERATION: nhật ký thao tác nghiệp vụ (logger tên "operation",
+    dùng bởi AuditLogService).
+  Cú pháp rolling policy theo Logback 1.5+ (Spring Boot 3.3): dùng
+  SizeAndTimeBasedRollingPolicy, không còn SizeAndTimeBasedFNATP.
+-->
 <configuration>
 
-  <!-- Directory for logs -->
-  <property name="LOG_DIR" value="logs" />
+    <property name="LOG_DIR" value="logs"/>
+    <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
 
-  <!-- System log appender -->
-  <appender name="SYSTEM" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <!-- active file (current day) -->
-    <file>${LOG_DIR}/bhyt_log_system_%d{ddMMyyyy}.log</file>
+    <!-- Log ra console (tiện khi phát triển) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
 
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <!-- archived files: date + index -->
-      <fileNamePattern>${LOG_DIR}/bhyt_log_system_%d{ddMMyyyy}.%i.log.zip</fileNamePattern>
-      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-        <!-- roll when reaches 10MB -->
-        <maxFileSize>10MB</maxFileSize>
-      </timeBasedFileNamingAndTriggeringPolicy>
-      <!-- keep approx 5 files per day by total size cap (5 * 10MB) -->
-      <totalSizeCap>50MB</totalSizeCap>
-      <!-- keep archives as long as totalSizeCap allows -->
-    </rollingPolicy>
+    <!-- Log hệ thống -->
+    <appender name="SYSTEM" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/bhyt_system.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/bhyt_system_%d{ddMMyyyy}.%i.log.zip</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>200MB</totalSizeCap>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
 
-    <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-    </encoder>
-  </appender>
+    <!-- Nhật ký thao tác nghiệp vụ -->
+    <appender name="OPERATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/bhyt_operation.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/bhyt_operation_%d{ddMMyyyy}.%i.log.zip</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>200MB</totalSizeCap>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
 
-  <!-- Operation/action log appender -->
-  <appender name="OPERATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${LOG_DIR}/bhyt_log_operation_%d{ddMMyyyy}.log</file>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="SYSTEM"/>
+    </root>
 
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_DIR}/bhyt_log_operation_%d{ddMMyyyy}.%i.log.zip</fileNamePattern>
-      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-        <maxFileSize>10MB</maxFileSize>
-      </timeBasedFileNamingAndTriggeringPolicy>
-      <totalSizeCap>50MB</totalSizeCap>
-    </rollingPolicy>
-
-    <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-    </encoder>
-  </appender>
-
-  <!-- root logger writes to SYSTEM -->
-  <root level="INFO">
-    <appender-ref ref="SYSTEM" />
-  </root>
-
-  <!-- dedicated logger for operation/action logs -->
-  <logger name="operation" level="INFO" additivity="false">
-    <appender-ref ref="OPERATION" />
-  </logger>
+    <logger name="operation" level="INFO" additivity="false">
+        <appender-ref ref="OPERATION"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
 
 </configuration>

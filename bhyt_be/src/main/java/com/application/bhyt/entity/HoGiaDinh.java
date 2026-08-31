@@ -10,6 +10,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Hộ gia đình (bảng {@code ho_gia_dinh}).
+ *
+ * <p>{@code soThanhVien} là giá trị dẫn xuất: luôn bằng số dòng
+ * {@code thanh_vien_ho_gia_dinh} đang hoạt động ({@code ngay_ket_thuc IS NULL}).
+ * Không cho client tự set trực tiếp; tầng service cập nhật lại sau mỗi lần
+ * thêm/bớt thành viên.</p>
+ */
 @Entity
 @Table(name = "ho_gia_dinh")
 @Data
@@ -22,9 +30,18 @@ public class HoGiaDinh implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /** Số thành viên hiện tại - do service tính lại, không nhận từ client. */
     @Column(name = "so_thanh_vien")
     private Integer soThanhVien = 0;
 
+    /**
+     * Tên/nhãn hộ (không bắt buộc). Khi nhập từ Excel, lấy từ cột "Hộ"
+     * (thường là tên chủ hộ hoặc biệt danh).
+     */
+    @Column(name = "ten")
+    private String ten;
+
+    /** Đường dẫn ảnh sổ hộ khẩu / VNeID của hộ. */
     @Column(name = "hinh_anh")
     private String hinhAnh;
 
@@ -47,6 +64,5 @@ public class HoGiaDinh implements Serializable {
     @PreUpdate
     protected void onUpdate() {
         this.ngayCapNhat = LocalDate.now();
-        if (this.thanhVien != null) this.soThanhVien = this.thanhVien.size();
     }
 }

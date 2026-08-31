@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### BHYT ###
+# File sao lưu tự sinh mỗi lần khởi động
+backup/
+# Log
+logs/
+# CSDL SQLite cục bộ (nếu không muốn commit dữ liệu)
+# database.db
+compile_output.txt
